@@ -1,0 +1,35 @@
+package components
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/msg"
+	"github.com/mikestefanello/pagoda/pkg/templates"
+)
+
+// Messages renders flash messages for a given type
+templ Messages(ctx templates.PageContext) {
+	for _, msgType := range []msg.Type{msg.TypeSuccess, msg.TypeError, msg.TypeWarning, msg.TypeInfo} {
+		for _, message := range ctx.GetMessages(msgType) {
+			<article class={ "message", getMessageClass(msgType) }>
+				<div class="message-body">
+					@templ.Raw(string(message))
+				</div>
+			</article>
+		}
+	}
+}
+
+// getMessageClass returns the CSS class for a message type
+func getMessageClass(typ msg.Type) string {
+	switch typ {
+	case msg.TypeSuccess:
+		return "is-success"
+	case msg.TypeError:
+		return "is-danger"
+	case msg.TypeWarning:
+		return "is-warning"
+	case msg.TypeInfo:
+		return "is-info"
+	default:
+		return ""
+	}
+}

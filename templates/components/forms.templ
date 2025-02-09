@@ -1,0 +1,52 @@
+package components
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+)
+
+// FormField renders a form field with label and error handling
+templ FormField(ctx templates.PageContext, name string, label string, required bool) {
+	<div class="field">
+		<label class="label" for={ name }>
+			{ label }
+			if required {
+				<span class="has-text-danger">*</span>
+			}
+		</label>
+		{ children... }
+		<p class="help is-danger"></p>
+	</div>
+}
+
+// TextInput renders a text input field
+templ TextInput(name string, value string, typ string) {
+	<div class="control">
+		<input
+			type={ typ }
+			name={ name }
+			id={ name }
+			value={ value }
+			class="input"
+		/>
+	</div>
+}
+
+// TextArea renders a textarea field
+templ TextArea(name string, value string) {
+	<div class="control">
+		<textarea
+			name={ name }
+			id={ name }
+			class="textarea"
+		>{ value }</textarea>
+	</div>
+}
+
+// Submit renders a submit button
+templ Submit(text string) {
+	<div class="field">
+		<div class="control">
+			<button type="submit" class="button is-primary">{ text }</button>
+		</div>
+	</div>
+}
