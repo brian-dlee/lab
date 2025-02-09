@@ -131,15 +131,14 @@ templ FileMsg() {
 
 // Home renders the home page
 templ Home(pctx templates.PageContext) {
-	{{ data := htmx.Request{} }}
-	if true {
-		@layouts.Main(pctx) {
-			@components.Messages(pctx)
-			if data.Target != "posts" {
-				@TopContent(pctx)
-			}
+	if data, ok := pctx.GetHTMXRequest().(htmx.Request); ok {
+		if data.Target == "posts" {
 			@Posts(pctx)
-			if data.Target != "posts" {
+		} else {
+			@layouts.Main(pctx) {
+				@components.Messages(pctx)
+				@TopContent(pctx)
+				@Posts(pctx)
 				@FileMsg()
 			}
 		}
