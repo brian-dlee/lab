@@ -31,7 +31,7 @@ dev:
   wait
 
 test:
-  go test -count= -p 1 ./...
+  go test -count=2 -p 1 ./...
 
 upgrade:
   go list -u -m all | grep "\[" | grep -v "indirect"
