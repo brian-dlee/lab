@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/a-h/templ"
-	"github.com/mikestefanello/pagoda/pkg/config"
+	"github.com/mikestefanello/pagoda/config"
 )
 
 var (
