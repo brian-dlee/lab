@@ -143,16 +143,19 @@ Originally, Postgres and Redis were chosen as defaults but since the aim of this
 
 ### Dependencies
 
-Ensure that [Go](https://go.dev/) is installed on your system.
+## Prerequisites
+
+- Go 1.x
+- Just (command runner) - Install from https://github.com/casey/just#installation
 
 ### Start the application
 
-After checking out the repository, from within the root, simply run `make run`:
+After checking out the repository, from within the root, simply run `just run`:
 
 ```
 git clone git@github.com:mikestefanello/pagoda.git
 cd pagoda
-make run
+just run
 ```
 
 Since this repository is a _template_ and not a Go _library_, you **do not** use `go get`.
@@ -163,7 +166,7 @@ By default, your data will be stored within the `dbs` directory. If you ever wan
 
 ### Running tests
 
-To run all tests in the application, execute `make test`. This ensures that the tests from each package are not run in parallel. This is required since many packages contain tests that connect to the test database which is stored in memory and reset automatically for each package.
+To run all tests in the application, execute `just test`. This ensures that the tests from each package are not run in parallel. This is required since many packages contain tests that connect to the test database which is stored in memory and reset automatically for each package.
 
 ## Service container
 
@@ -269,12 +272,12 @@ The two included entity types are:
 
 ### New entity type
 
-While you should refer to their [documentation](https://entgo.io/docs/getting-started) for detailed usage, it's helpful to understand how to create an entity type and generate code. To make this easier, the `Makefile` contains some helpers.
+While you should refer to their [documentation](https://entgo.io/docs/getting-started) for detailed usage, it's helpful to understand how to create an entity type and generate code. To make this easier, the following commands are available:
 
-1. Ensure all Ent code is downloaded by executing `make ent-install`.
-2. Create the new entity type by executing `make ent-new name=User` where `User` is the name of the entity type. This will generate a file like you can see in `ent/schema/user.go` though the `Fields()` and `Edges()` will be left empty.
+1. Ensure all Ent code is downloaded by executing `just ent-install`.
+2. Create the new entity type by executing `just ent-new name=User` where `User` is the name of the entity type. This will generate a file like you can see in `ent/schema/user.go` though the `Fields()` and `Edges()` will be left empty.
 3. Populate the `Fields()` and optionally the `Edges()` (which are the relationships to other entity types).
-4. When done, generate all code by executing `make ent-gen`.
+4. When done, generate all code by executing `just ent-gen`.
 
 The generated code is extremely flexible and impressive. An example to highlight this is one used within this application:
 
