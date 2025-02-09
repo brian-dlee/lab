@@ -1,0 +1,158 @@
+package layouts
+
+import "github.com/brian-dlee/lab/pkg/templates"
+
+// MetaTags renders the meta tags in the head section
+templ MetaTags(pctx templates.PageContext) {
+	<title>
+		{ pctx.GetAppName() }
+		if pctx.GetTitle() != "" {
+			" | " + pctx.GetTitle()
+		}
+	</title>
+	<link rel="icon" href={ string(pctx.File("favicon.png")) }/>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+}
+
+// CSS renders the CSS includes
+templ CSS() {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+}
+
+// JS renders the JavaScript includes
+templ JS() {
+	<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+}
+
+// Footer renders the footer section with CSRF and HTMX scripts
+templ Footer(pctx templates.PageContext) {
+	if pctx.GetCSRF() != "" {
+		<script>
+			document.body.addEventListener('htmx:configRequest', function(evt)  {
+				if (evt.detail.verb !== "get") {
+					evt.detail.parameters['csrf'] = '{ ctx.GetCSRF() }';
+				}
+			})
+		</script>
+	}
+	<script>
+		document.body.addEventListener('htmx:beforeSwap', function(evt) {
+			if (evt.detail.xhr.status >= 400){
+				evt.detail.shouldSwap = true;
+				evt.detail.target = htmx.find("body");
+			}
+		});
+	</script>
+}
+
+// Search renders the search modal component
+templ Search(pctx templates.PageContext) {
+	<div class="search mr-2 mt-1" x-data="{modal:false}">
+		<input class="input" type="search" placeholder="Search..." @click="modal = true; $nextTick(() => $refs.input.focus());"/>
+		<div class="modal" :class="modal ? 'is-active' : ''" x-show="modal == true">
+			<div class="modal-background"></div>
+			<div class="modal-content" @click.outside="modal = false;">
+				<div class="box">
+					<h2 class="subtitle">Search</h2>
+					<p class="control">
+						<input
+							hx-get={ string(pctx.URL("search")) }
+							hx-trigger="keyup changed delay:500ms"
+							hx-target="#results"
+							name="query"
+							class="input"
+							type="search"
+							placeholder="Search..."
+							x-ref="input"
+						/>
+					</p>
+					<div class="block"></div>
+					<div id="results"></div>
+				</div>
+			</div>
+			<button class="modal-close is-large" aria-label="close"></button>
+		</div>
+	</div>
+}
+
+// Main renders the main layout template
+templ Main(pctx templates.PageContext) {
+	<!DOCTYPE html>
+	<html lang="en" style="height:100%;">
+		<head>
+			@MetaTags(pctx)
+			@CSS()
+			@JS()
+		</head>
+		<body class="has-background-light" style="min-height:100%;">
+			<nav class="navbar is-dark">
+				<div class="container">
+					<div class="navbar-brand" hx-boost="true">
+						<a href={ pctx.URL("home") } class="navbar-item">{ pctx.GetAppName() }</a>
+					</div>
+					<div id="navbarMenu" class="navbar-menu">
+						<div class="navbar-end">
+							@Search(pctx)
+						</div>
+					</div>
+				</div>
+			</nav>
+			<div class="container mt-5">
+				<div class="columns">
+					<div class="column is-2">
+						<aside class="menu" hx-boost="true">
+							<p class="menu-label">General</p>
+							<ul class="menu-list">
+								<li>
+									@pctx.Link(string(pctx.URL("home")), "Dashboard", pctx.GetPath())
+								</li>
+								<li>
+									@pctx.Link(string(pctx.URL("about")), "About", pctx.GetPath())
+								</li>
+								<li>
+									@pctx.Link(string(pctx.URL("contact")), "Contact", pctx.GetPath())
+								</li>
+								<li>
+									@pctx.Link(string(pctx.URL("cache")), "Cache", pctx.GetPath())
+								</li>
+								<li>
+									@pctx.Link(string(pctx.URL("task")), "Task", pctx.GetPath())
+								</li>
+							</ul>
+							<p class="menu-label">Account</p>
+							<ul class="menu-list">
+								if pctx.IsAuth() {
+									<li>
+										@pctx.Link(string(pctx.URL("logout")), "Logout", pctx.GetPath())
+									</li>
+								} else {
+									<li>
+										@pctx.Link(string(pctx.URL("login")), "Login", pctx.GetPath())
+									</li>
+									<li>
+										@pctx.Link(string(pctx.URL("register")), "Register", pctx.GetPath())
+									</li>
+									<li>
+										@pctx.Link(string(pctx.URL("forgot_password")), "Forgot password", pctx.GetPath())
+									</li>
+								}
+							</ul>
+						</aside>
+					</div>
+					<div class="column is-10">
+						<div class="box">
+							if pctx.GetTitle() != "" {
+								<h1 class="title">{ pctx.GetTitle() }</h1>
+							}
+							{ children... }
+						</div>
+					</div>
+				</div>
+			</div>
+			@Footer(pctx)
+		</body>
+	</html>
+}

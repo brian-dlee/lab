@@ -3,12 +3,12 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/brian-dlee/lab/pkg/context"
+	"github.com/brian-dlee/lab/pkg/log"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/context"
-	"github.com/mikestefanello/pagoda/pkg/log"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 )
 
 type Error struct {
@@ -43,7 +43,7 @@ func (e *Error) Page(err error, ctx echo.Context) {
 	p.StatusCode = code
 	p.HTMX.Request.Enabled = false
 
-	if err = e.RenderPage(ctx, p); err != nil {
+	if err = e.RenderPage(p); err != nil {
 		log.Ctx(ctx).Error("failed to render error page",
 			"error", err,
 		)

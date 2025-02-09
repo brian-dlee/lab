@@ -2,63 +2,40 @@ package services
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"html/template"
-	"io/fs"
+	"io"
 	"net/http"
-	"sync"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/config"
-	"github.com/mikestefanello/pagoda/pkg/context"
-	"github.com/mikestefanello/pagoda/pkg/log"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/templates"
+
+	"github.com/brian-dlee/lab/config"
+	"github.com/brian-dlee/lab/ent"
+	"github.com/brian-dlee/lab/pkg/context"
+	"github.com/brian-dlee/lab/pkg/log"
+	"github.com/brian-dlee/lab/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/page"
+	pkgtemplates "github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates"
+	"github.com/brian-dlee/lab/templates/pages"
 )
 
 // cachedPageGroup stores the cache group for cached pages
 const cachedPageGroup = "page"
 
 type (
-	// TemplateRenderer provides a flexible and easy to use method of rendering simple templates or complex sets of
-	// templates while also providing caching and/or hot-reloading depending on your current environment
+	// TemplateRenderer provides a flexible and easy to use method of rendering templ components
+	// while providing caching depending on your current environment
 	TemplateRenderer struct {
-		// templateCache stores a cache of parsed page templates
-		templateCache sync.Map
-
-		// funcMap stores the template function map
-		funcMap template.FuncMap
-
 		// config stores application configuration
 		config *config.Config
 
 		// cache stores the cache client
 		cache *CacheClient
-	}
 
-	// TemplateParsed is a wrapper around parsed templates which are stored in the TemplateRenderer cache
-	TemplateParsed struct {
-		// Template is the parsed template
-		Template *template.Template
-
-		// build stores the build data used to parse the template
-		build *templateBuild
-	}
-
-	// templateBuild stores the build data used to parse a template
-	templateBuild struct {
-		group       string
-		key         string
-		base        string
-		files       []string
-		directories []string
-	}
-
-	// templateBuilder handles chaining a template parse operation
-	templateBuilder struct {
-		build    *templateBuild
-		renderer *TemplateRenderer
+		// fm funcmap
+		fm *pkgtemplates.FuncMap
 	}
 
 	// CachedPage is what is used to store a rendered Page in the cache
@@ -78,29 +55,16 @@ type (
 )
 
 // NewTemplateRenderer creates a new TemplateRenderer
-func NewTemplateRenderer(cfg *config.Config, cache *CacheClient, fm template.FuncMap) *TemplateRenderer {
+func NewTemplateRenderer(cfg *config.Config, cache *CacheClient, fm *pkgtemplates.FuncMap) *TemplateRenderer {
 	return &TemplateRenderer{
-		templateCache: sync.Map{},
-		funcMap:       fm,
-		config:        cfg,
-		cache:         cache,
+		config: cfg,
+		cache:  cache,
+		fm:     fm,
 	}
 }
 
-// Parse creates a template build operation
-func (t *TemplateRenderer) Parse() *templateBuilder {
-	return &templateBuilder{
-		renderer: t,
-		build:    &templateBuild{},
-	}
-}
-
-// RenderPage renders a Page as an HTTP response
-func (t *TemplateRenderer) RenderPage(ctx echo.Context, page page.Page) error {
-	var buf *bytes.Buffer
-	var err error
-	templateGroup := "page"
-
+// RenderPage renders a Page as an HTTP response using templ components
+func (t *TemplateRenderer) RenderPage(page page.Page) error {
 	// Page name is required
 	if page.Name == "" {
 		return echo.NewHTTPError(http.StatusInternalServerError, "page render failed due to missing name")
@@ -111,58 +75,76 @@ func (t *TemplateRenderer) RenderPage(ctx echo.Context, page page.Page) error {
 		page.AppName = t.config.App.Name
 	}
 
+	// Create page context for templ components
+	pageCtx := &pageContext{page: page, fm: t.fm}
+
 	// Check if this is an HTMX non-boosted request which indicates that only partial
 	// content should be rendered
 	if page.HTMX.Request.Enabled && !page.HTMX.Request.Boosted {
 		// Switch the layout which will only render the page content
 		page.Layout = templates.LayoutHTMX
-
-		// Alter the template group so this is cached separately
-		templateGroup = "page:htmx"
 	}
 
-	// Parse and execute the templates for the Page
-	// As mentioned in the documentation for the Page struct, the templates used for the page will be:
-	// 1. The layout/base template specified in Page.Layout
-	// 2. The content template specified in Page.Name
-	// 3. All templates within the components directory
-	// Also included is the function map provided by the funcmap package
-	buf, err = t.
-		Parse().
-		Group(templateGroup).
-		Key(string(page.Name)).
-		Base(string(page.Layout)).
-		Files(
-			fmt.Sprintf("layouts/%s", page.Layout),
-			fmt.Sprintf("pages/%s", page.Name),
-		).
-		Directories("components").
-		Execute(page)
-
-	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Sprintf("failed to parse and execute templates: %s", err),
-		)
-	}
+	// Create a buffer to capture the rendered HTML for caching
+	buf := new(bytes.Buffer)
+	writer := io.MultiWriter(page.Context.Response().Writer, buf)
 
 	// Set the status code
-	ctx.Response().Status = page.StatusCode
+	page.Context.Response().Status = page.StatusCode
 
 	// Set any headers
 	for k, v := range page.Headers {
-		ctx.Response().Header().Set(k, v)
+		page.Context.Response().Header().Set(k, v)
 	}
 
 	// Apply the HTMX response, if one
 	if page.HTMX.Response != nil {
-		page.HTMX.Response.Apply(ctx)
+		page.HTMX.Response.Apply(page.Context)
+	}
+
+	// Render the appropriate component based on the page name
+	var component templ.Component
+	switch page.Name {
+	case "home":
+		component = pages.Home(pageCtx)
+	case "about":
+		component = pages.About(pageCtx)
+	case "contact":
+		component = pages.Contact(pageCtx)
+	case "cache":
+		component = pages.Cache(pageCtx)
+	case "task":
+		if page.HTMX.Request.Target != "" {
+			component = pages.TaskProgress(pageCtx)
+		} else {
+			component = pages.Task(pageCtx)
+		}
+	case "search":
+		component = pages.SearchResults(pageCtx)
+	case "login":
+		component = pages.Login(pageCtx)
+	case "register":
+		component = pages.Register(pageCtx)
+	case "forgot_password":
+		component = pages.ForgotPassword(pageCtx)
+	case "reset_password":
+		component = pages.ResetPassword(pageCtx)
+	case "error":
+		component = pages.Error(pageCtx)
+	default:
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("unknown page: %s", page.Name))
+	}
+
+	// Render the component
+	err := component.Render(page.Context.Request().Context(), writer)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to render template: %s", err))
 	}
 
 	// Cache this page, if caching was enabled
-	t.cachePage(ctx, page, buf)
+	t.cachePage(page.Context, page, buf)
 
-	return ctx.HTMLBlob(ctx.Response().Status, buf.Bytes())
+	return nil
 }
 
 // cachePage caches the HTML for a given Page if the Page has caching enabled
@@ -234,143 +216,60 @@ func (t *TemplateRenderer) getCacheKey(group, key string) string {
 	return key
 }
 
-// parse parses a set of templates and caches them for quick execution
-// If the application environment is set to local, the cache will be bypassed and templates will be
-// parsed upon each request so hot-reloading is possible without restarts.
-// Also included will be the function map provided by the funcmap package.
-func (t *TemplateRenderer) parse(build *templateBuild) (*TemplateParsed, error) {
-	var tp *TemplateParsed
-	var err error
-
-	switch {
-	case build.key == "":
-		return nil, errors.New("cannot parse template without key")
-	case len(build.files) == 0 && len(build.directories) == 0:
-		return nil, errors.New("cannot parse template without files or directories")
-	case build.base == "":
-		return nil, errors.New("cannot parse template without base")
-	}
-
-	// Generate the cache key
-	cacheKey := t.getCacheKey(build.group, build.key)
-
-	// Check if the template has not yet been parsed or if the app environment is local, so that
-	// templates reflect changes without having the restart the server
-	if tp, err = t.Load(build.group, build.key); err != nil || t.config.App.Environment == config.EnvLocal {
-		// Initialize the parsed template with the function map
-		parsed := template.New(build.base + config.TemplateExt).
-			Funcs(t.funcMap)
-
-		// Format the requested files
-		for k, v := range build.files {
-			build.files[k] = fmt.Sprintf("%s%s", v, config.TemplateExt)
-		}
-
-		// Include all files within the requested directories
-		for k, v := range build.directories {
-			build.directories[k] = fmt.Sprintf("%s/*%s", v, config.TemplateExt)
-		}
-
-		// Get the templates
-		var tpl fs.FS
-		if t.config.App.Environment == config.EnvLocal {
-			tpl = templates.GetOS()
-		} else {
-			tpl = templates.Get()
-		}
-
-		// Parse the templates
-		parsed, err = parsed.ParseFS(tpl, append(build.files, build.directories...)...)
-		if err != nil {
-			return nil, err
-		}
-
-		// Store the template so this process only happens once
-		tp = &TemplateParsed{
-			Template: parsed,
-			build:    build,
-		}
-		t.templateCache.Store(cacheKey, tp)
-	}
-
-	return tp, nil
+// pageContext implements templates.PageContext
+type pageContext struct {
+	page page.Page
+	fm   *pkgtemplates.FuncMap
 }
 
-// Load loads a template from the cache
-func (t *TemplateRenderer) Load(group, key string) (*TemplateParsed, error) {
-	load, ok := t.templateCache.Load(t.getCacheKey(group, key))
-	if !ok {
-		return nil, errors.New("uncached page template requested")
-	}
-
-	tmpl, ok := load.(*TemplateParsed)
-	if !ok {
-		return nil, errors.New("unable to cast cached template")
-	}
-
-	return tmpl, nil
+func (c *pageContext) IsAuth() bool {
+	return c.page.IsAuth
 }
 
-// Execute executes a template with the given data and provides the output
-func (t *TemplateParsed) Execute(data any) (*bytes.Buffer, error) {
-	if t.Template == nil {
-		return nil, errors.New("cannot execute template: template not initialized")
-	}
-
-	buf := new(bytes.Buffer)
-	err := t.Template.ExecuteTemplate(buf, t.build.base+config.TemplateExt, data)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf, nil
+func (c *pageContext) GetAuthUser() *ent.User {
+	return c.page.AuthUser
 }
 
-// Group sets the cache group for the template being built
-func (t *templateBuilder) Group(group string) *templateBuilder {
-	t.build.group = group
-	return t
+func (c *pageContext) GetPath() string {
+	return c.page.Path
 }
 
-// Key sets the cache key for the template being built
-func (t *templateBuilder) Key(key string) *templateBuilder {
-	t.build.key = key
-	return t
+func (c *pageContext) GetCSRF() string {
+	return c.page.CSRF
 }
 
-// Base sets the name of the base template to be used during template parsing and execution.
-// This should be only the file name without a directory or extension.
-func (t *templateBuilder) Base(base string) *templateBuilder {
-	t.build.base = base
-	return t
+func (c *pageContext) GetTitle() string {
+	return c.page.Title
 }
 
-// Files sets a list of template files to include in the parse.
-// This should not include the file extension and the paths should be relative to the templates directory.
-func (t *templateBuilder) Files(files ...string) *templateBuilder {
-	t.build.files = files
-	return t
+func (c *pageContext) GetAppName() string {
+	return c.page.AppName
 }
 
-// Directories sets a list of directories that all template files within will be parsed.
-// The paths should be relative to the templates directory.
-func (t *templateBuilder) Directories(directories ...string) *templateBuilder {
-	t.build.directories = directories
-	return t
+func (c *pageContext) GetMessages(typ msg.Type) []template.HTML {
+	return c.page.GetMessages(typ)
 }
 
-// Store parsed the templates and stores them in the cache
-func (t *templateBuilder) Store() (*TemplateParsed, error) {
-	return t.renderer.parse(t.build)
+func (c *pageContext) GetHTMXRequest() any {
+	return c.page.HTMX.Request
 }
 
-// Execute executes the template with the given data.
-// If the template has not already been cached, this will parse and cache the template
-func (t *templateBuilder) Execute(data any) (*bytes.Buffer, error) {
-	tp, err := t.Store()
-	if err != nil {
-		return nil, err
-	}
+func (c *pageContext) GetData() any {
+	return c.page.Data
+}
 
-	return tp.Execute(data)
+func (c *pageContext) GetPager() page.Pager {
+	return c.page.Pager
+}
+
+func (c *pageContext) URL(routeName string, params ...any) templ.SafeURL {
+	return c.fm.URL(routeName, params...)
+}
+
+func (c *pageContext) File(filename string) templ.SafeURL {
+	return c.fm.File(filename)
+}
+
+func (c *pageContext) Link(url, text, currentPath string, classes ...string) templ.Component {
+	return c.fm.Link(url, text, currentPath, classes...)
 }

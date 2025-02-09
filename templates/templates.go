@@ -25,11 +25,11 @@ const (
 	PageCache          Page = "cache"
 	PageContact        Page = "contact"
 	PageError          Page = "error"
-	PageForgotPassword Page = "forgot-password"
+	PageForgotPassword Page = "forgot_password"
 	PageHome           Page = "home"
 	PageLogin          Page = "login"
 	PageRegister       Page = "register"
-	PageResetPassword  Page = "reset-password"
+	PageResetPassword  Page = "reset_password"
 	PageSearch         Page = "search"
 	PageTask           Page = "task"
 )

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"html/template"
 
+	"github.com/brian-dlee/lab/pkg/models"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 )
 
 const (
@@ -15,27 +16,9 @@ const (
 	routeNameHome  = "home"
 )
 
-type (
-	Pages struct {
-		*services.TemplateRenderer
-	}
-
-	post struct {
-		Title string
-		Body  string
-	}
-
-	aboutData struct {
-		ShowCacheWarning bool
-		FrontendTabs     []aboutTab
-		BackendTabs      []aboutTab
-	}
-
-	aboutTab struct {
-		Title string
-		Body  template.HTML
-	}
-)
+type Pages struct {
+	*services.TemplateRenderer
+}
 
 func init() {
 	Register(new(Pages))
@@ -47,6 +30,11 @@ func (h *Pages) Init(c *services.Container) error {
 }
 
 func (h *Pages) Routes(g *echo.Group) {
+	g.GET("/favicon.ico", func(ctx echo.Context) error {
+		response := ctx.Response()
+		response.Status = 404
+		return nil
+	})
 	g.GET("/", h.Home).Name = routeNameHome
 	g.GET("/about", h.About).Name = routeNameAbout
 }
@@ -60,16 +48,16 @@ func (h *Pages) Home(ctx echo.Context) error {
 	p.Pager = page.NewPager(ctx, 4)
 	p.Data = h.fetchPosts(&p.Pager)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 // fetchPosts is an mock example of fetching posts to illustrate how paging works
-func (h *Pages) fetchPosts(pager *page.Pager) []post {
+func (h *Pages) fetchPosts(pager *page.Pager) []models.Post {
 	pager.SetItems(20)
-	posts := make([]post, 20)
+	posts := make([]models.Post, 20)
 
 	for k := range posts {
-		posts[k] = post{
+		posts[k] = models.Post{
 			Title: fmt.Sprintf("Post example #%d", k+1),
 			Body:  fmt.Sprintf("Lorem ipsum example #%d ddolor sit amet, consectetur adipiscing elit. Nam elementum vulputate tristique.", k+1),
 		}
@@ -89,9 +77,9 @@ func (h *Pages) About(ctx echo.Context) error {
 
 	// A simple example of how the Data field can contain anything you want to send to the templates
 	// even though you wouldn't normally send markup like this
-	p.Data = aboutData{
+	p.Data = models.AboutData{
 		ShowCacheWarning: true,
-		FrontendTabs: []aboutTab{
+		FrontendTabs: []models.AboutTab{
 			{
 				Title: "HTMX",
 				Body:  template.HTML(`Completes HTML as a hypertext by providing attributes to AJAXify anything and much more. Visit <a href="https://htmx.org/">htmx.org</a> to learn more.`),
@@ -105,7 +93,7 @@ func (h *Pages) About(ctx echo.Context) error {
 				Body:  template.HTML(`Ready-to-use frontend components that you can easily combine to build responsive web interfaces with no JavaScript requirements. Visit <a href="https://bulma.io/">bulma.io</a> to learn more.`),
 			},
 		},
-		BackendTabs: []aboutTab{
+		BackendTabs: []models.AboutTab{
 			{
 				Title: "Echo",
 				Body:  template.HTML(`High performance, extensible, minimalist Go web framework. Visit <a href="https://echo.labstack.com/">echo.labstack.com</a> to learn more.`),
@@ -117,5 +105,5 @@ func (h *Pages) About(ctx echo.Context) error {
 		},
 	}
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }

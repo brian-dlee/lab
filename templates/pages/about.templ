@@ -1,0 +1,20 @@
+package pages
+
+import (
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+// About renders the about page
+templ About(pctx templates.PageContext) {
+	@layouts.Main(pctx) {
+		@components.Messages(pctx)
+		<div class="content">
+			<p>
+				This is a sample application built using Go and the Echo framework.
+				It demonstrates various features and best practices for building web applications.
+			</p>
+		</div>
+	}
+}

@@ -143,19 +143,23 @@ Originally, Postgres and Redis were chosen as defaults but since the aim of this
 
 ### Dependencies
 
-## Prerequisites
+Ensure that the following dependencies are installed on your system:
 
-- Go 1.x
-- Just (command runner) - Install from https://github.com/casey/just#installation
+- [Go](https://go.dev/)
+- [templ](https://templ.guide/) - Install via `go install github.com/a-h/templ/cmd/templ@latest`
+
+After installing templ, you'll need to run `just templ-gen` to generate the template code before starting the application.
 
 ### Start the application
 
-After checking out the repository, from within the root, simply run `just run`:
+After checking out the repository, from within the root, run:
 
 ```
 git clone git@github.com:mikestefanello/pagoda.git
 cd pagoda
-just run
+just templ-install  # Install templ CLI tool
+just templ-gen      # Generate templ code
+just run            # Run the application
 ```
 
 Since this repository is a _template_ and not a Go _library_, you **do not** use `go get`.

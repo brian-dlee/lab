@@ -11,9 +11,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/mikestefanello/pagoda/ent/passwordtoken"
-	"github.com/mikestefanello/pagoda/ent/predicate"
-	"github.com/mikestefanello/pagoda/ent/user"
+	"github.com/brian-dlee/lab/ent/passwordtoken"
+	"github.com/brian-dlee/lab/ent/predicate"
+	"github.com/brian-dlee/lab/ent/user"
 )
 
 const (

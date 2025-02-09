@@ -1,4 +1,4 @@
-module github.com/mikestefanello/pagoda
+module github.com/brian-dlee/lab
 
 go 1.23.0
 
@@ -24,6 +24,7 @@ require (
 	ariga.io/atlas v0.21.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/a-h/templ v0.3.833 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect

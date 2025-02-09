@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mikestefanello/pagoda/pkg/handlers"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/pkg/tasks"
+	"github.com/brian-dlee/lab/pkg/handlers"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/pkg/tasks"
 )
 
 func main() {

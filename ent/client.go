@@ -9,14 +9,14 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/mikestefanello/pagoda/ent/migrate"
+	"github.com/brian-dlee/lab/ent/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/mikestefanello/pagoda/ent/passwordtoken"
-	"github.com/mikestefanello/pagoda/ent/user"
+	"github.com/brian-dlee/lab/ent/passwordtoken"
+	"github.com/brian-dlee/lab/ent/user"
 )
 
 // Client is the client that holds all ent builders.

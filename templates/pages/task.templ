@@ -1,0 +1,61 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+// Task renders the task demo page
+templ Task(pctx templates.PageContext) {
+	@layouts.Main(pctx) {
+		@components.Messages(pctx)
+		<div class="content">
+			<p>
+				This page demonstrates background task processing.
+				Click the button below to start a task that will run for 10 seconds.
+			</p>
+			<button
+				class="button is-primary"
+				hx-post={ string(pctx.URL("task")) }
+				hx-swap="outerHTML"
+			>
+				Start task
+			</button>
+		</div>
+	}
+}
+
+type TaskProgressData struct {
+	Progress float64
+	Complete bool
+}
+
+// TaskProgress renders the task progress for HTMX requests
+templ TaskProgress(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(TaskProgressData); ok {
+		@layouts.LayoutHTMX(pctx) {
+			<div class="content">
+				<p>Task is running...</p>
+				<progress class="progress is-primary" max="100" value={ fmt.Sprintf("%f", data.Progress) }></progress>
+				if data.Complete {
+					<p>Task complete!</p>
+					<button
+						class="button is-primary"
+						hx-post={ string(pctx.URL("task")) }
+						hx-swap="outerHTML"
+					>
+						Start new task
+					</button>
+				} else {
+					<div
+						hx-get={ string(pctx.URL(("task"))) }
+						hx-trigger="load delay:1s"
+						hx-swap="outerHTML"
+					></div>
+				}
+			</div>
+		}
+	}
+}

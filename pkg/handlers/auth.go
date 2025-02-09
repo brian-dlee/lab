@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/brian-dlee/lab/ent"
+	"github.com/brian-dlee/lab/ent/user"
+	"github.com/brian-dlee/lab/pkg/context"
+	"github.com/brian-dlee/lab/pkg/form"
+	"github.com/brian-dlee/lab/pkg/log"
+	"github.com/brian-dlee/lab/pkg/middleware"
+	"github.com/brian-dlee/lab/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/redirect"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/ent"
-	"github.com/mikestefanello/pagoda/ent/user"
-	"github.com/mikestefanello/pagoda/pkg/context"
-	"github.com/mikestefanello/pagoda/pkg/form"
-	"github.com/mikestefanello/pagoda/pkg/log"
-	"github.com/mikestefanello/pagoda/pkg/middleware"
-	"github.com/mikestefanello/pagoda/pkg/msg"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/redirect"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 )
 
 const (
@@ -105,7 +105,7 @@ func (h *Auth) ForgotPasswordPage(ctx echo.Context) error {
 	p.Title = "Forgot password"
 	p.Form = form.Get[forgotPasswordForm](ctx)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Auth) ForgotPasswordSubmit(ctx echo.Context) error {
@@ -174,7 +174,7 @@ func (h *Auth) LoginPage(ctx echo.Context) error {
 	p.Title = "Log in"
 	p.Form = form.Get[loginForm](ctx)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Auth) LoginSubmit(ctx echo.Context) error {
@@ -248,7 +248,7 @@ func (h *Auth) RegisterPage(ctx echo.Context) error {
 	p.Title = "Register"
 	p.Form = form.Get[registerForm](ctx)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Auth) RegisterSubmit(ctx echo.Context) error {
@@ -354,7 +354,7 @@ func (h *Auth) ResetPasswordPage(ctx echo.Context) error {
 	p.Title = "Reset password"
 	p.Form = form.Get[resetPasswordForm](ctx)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Auth) ResetPasswordSubmit(ctx echo.Context) error {

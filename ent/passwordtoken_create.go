@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/mikestefanello/pagoda/ent/passwordtoken"
-	"github.com/mikestefanello/pagoda/ent/user"
+	"github.com/brian-dlee/lab/ent/passwordtoken"
+	"github.com/brian-dlee/lab/ent/user"
 )
 
 // PasswordTokenCreate is the builder for creating a PasswordToken entity.
@@ -106,7 +106,7 @@ func (ptc *PasswordTokenCreate) check() error {
 	if _, ok := ptc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "PasswordToken.created_at"`)}
 	}
-	if _, ok := ptc.mutation.UserID(); !ok {
+	if len(ptc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "PasswordToken.user"`)}
 	}
 	return nil

@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/form"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 	"time"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/brian-dlee/lab/pkg/form"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 )
 
 const (
@@ -49,6 +51,8 @@ func (h *Cache) Page(ctx echo.Context) error {
 	p.Title = "Set a cache entry"
 	p.Form = form.Get[cacheForm](ctx)
 
+	var cacheValue *string
+
 	// Fetch the value from the cache
 	value, err := h.cache.
 		Get().
@@ -58,13 +62,17 @@ func (h *Cache) Page(ctx echo.Context) error {
 	// Store the value in the page, so it can be rendered, if found
 	switch {
 	case err == nil:
-		p.Data = value.(string)
+		if stringValue, ok := value.(string); ok {
+			cacheValue = &stringValue
+		}
 	case errors.Is(err, services.ErrCacheMiss):
 	default:
 		return fail(err, "failed to fetch from cache")
 	}
 
-	return h.RenderPage(ctx, p)
+	p.Data = cacheValue
+
+	return h.RenderPage(p)
 }
 
 func (h *Cache) Submit(ctx echo.Context) error {

@@ -1,2 +1,7 @@
-.idea
-dbs
+/.data
+/.local
+
+/dbs
+
+**/*_templ.txt
+**/*_templ.go

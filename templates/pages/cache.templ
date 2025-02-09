@@ -1,0 +1,36 @@
+package pages
+
+import (
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+type CacheData struct {
+	Time string
+}
+
+// Cache renders the cache demo page
+templ Cache(pctx templates.PageContext) {
+	if time, ok := pctx.GetData().(*string); ok {
+		@layouts.Main(pctx) {
+			@components.Messages(pctx)
+			<div class="content">
+				<p>
+					This page demonstrates caching functionality.
+					The response of this page is cached for 10 seconds.
+					Refresh to see the same content until the cache expires.
+				</p>
+				<p>
+					if time != nil {
+						"Current time: " + *time
+					} else {
+						"N/A"
+					}
+				</p>
+			</div>
+		}
+	} else {
+		"NO CACHE"
+	}
+}

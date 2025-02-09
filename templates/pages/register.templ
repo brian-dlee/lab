@@ -1,0 +1,30 @@
+package pages
+
+import (
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+// Register renders the registration page
+templ Register(pctx templates.PageContext) {
+	@layouts.Auth(pctx) {
+		@components.Messages(pctx)
+		<form method="post">
+			<input type="hidden" name="csrf" value={ pctx.GetCSRF() }/>
+			@components.FormField(pctx, "name", "Name", true) {
+				@components.TextInput("name", "", "text")
+			}
+			@components.FormField(pctx, "email", "Email", true) {
+				@components.TextInput("email", "", "email")
+			}
+			@components.FormField(pctx, "password", "Password", true) {
+				@components.TextInput("password", "", "password")
+			}
+			@components.FormField(pctx, "password_confirm", "Confirm password", true) {
+				@components.TextInput("password_confirm", "", "password")
+			}
+			@components.Submit("Register")
+		</form>
+	}
+}

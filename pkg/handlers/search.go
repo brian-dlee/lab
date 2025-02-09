@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 )
 
 const routeNameSearch = "search"
@@ -56,5 +56,5 @@ func (h *Search) Page(ctx echo.Context) error {
 	}
 	p.Data = results
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }

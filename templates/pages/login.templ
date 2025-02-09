@@ -1,0 +1,28 @@
+package pages
+
+import (
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+// Login renders the login page
+templ Login(pctx templates.PageContext) {
+	@layouts.Auth(pctx) {
+		@components.Messages(pctx)
+		<form method="post">
+			<input type="hidden" name="csrf" value={ pctx.GetCSRF() }/>
+			@components.FormField(pctx, "email", "Email", true) {
+				@components.TextInput("email", "", "email")
+			}
+			@components.FormField(pctx, "password", "Password", true) {
+				@components.TextInput("password", "", "password")
+			}
+			@components.Submit("Login")
+			<hr/>
+			<p class="has-text-centered">
+				<a href={ pctx.URL("forgot_password") }>Forgot your password?</a>
+			</p>
+		</form>
+	}
+}

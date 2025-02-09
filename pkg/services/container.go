@@ -4,21 +4,23 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/mikestefanello/backlite"
 	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/mikestefanello/backlite"
+
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/brian-dlee/lab/config"
+	"github.com/brian-dlee/lab/ent"
+	"github.com/brian-dlee/lab/pkg/log"
+	"github.com/brian-dlee/lab/pkg/templates"
 	"github.com/labstack/echo/v4"
+	gommonlog "github.com/labstack/gommon/log"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/mikestefanello/pagoda/config"
-	"github.com/mikestefanello/pagoda/ent"
-	"github.com/mikestefanello/pagoda/pkg/funcmap"
-	"github.com/mikestefanello/pagoda/pkg/log"
 
 	// Require by ent
-	_ "github.com/mikestefanello/pagoda/ent/runtime"
+	_ "github.com/brian-dlee/lab/ent/runtime"
 )
 
 // Container contains all services used by the application and provides an easy way to handle dependency
@@ -110,6 +112,7 @@ func (c *Container) initValidator() {
 // initWeb initializes the web framework
 func (c *Container) initWeb() {
 	c.Web = echo.New()
+	c.Web.Logger.SetLevel(gommonlog.DEBUG)
 	c.Web.HideBanner = true
 	c.Web.Validator = c.Validator
 }
@@ -161,7 +164,7 @@ func (c *Container) initAuth() {
 
 // initTemplateRenderer initializes the template renderer
 func (c *Container) initTemplateRenderer() {
-	c.TemplateRenderer = NewTemplateRenderer(c.Config, c.Cache, funcmap.NewFuncMap(c.Web))
+	c.TemplateRenderer = NewTemplateRenderer(c.Config, c.Cache, templates.NewFuncMap(c.Web, templates.DefaultCacheBuster))
 }
 
 // initMail initialize the mail client

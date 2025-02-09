@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/tests"
-	"github.com/mikestefanello/pagoda/templates"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/tests"
+	"github.com/brian-dlee/lab/templates"
 
 	"github.com/stretchr/testify/require"
 
@@ -25,7 +25,7 @@ func TestServeCachedPage(t *testing.T) {
 	p.StatusCode = http.StatusCreated
 	p.Headers["a"] = "b"
 	p.Headers["c"] = "d"
-	err := c.TemplateRenderer.RenderPage(ctx, p)
+	err := c.TemplateRenderer.RenderPage(p)
 	output := rec.Body.Bytes()
 	require.NoError(t, err)
 

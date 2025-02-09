@@ -1,0 +1,38 @@
+package pages
+
+import (
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/layouts"
+)
+
+type SearchResultsDataResult struct {
+	URL   string
+	Title string
+}
+
+type SearchResultsData struct {
+	Results []SearchResultsDataResult
+}
+
+// SearchResults renders the search results for HTMX requests
+templ SearchResults(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(SearchResultsData); ok {
+		@layouts.LayoutHTMX(pctx) {
+			if len(data.Results) == 0 {
+				<p>No results found.</p>
+			} else {
+				<div class="menu">
+					<ul class="menu-list">
+						for _, result := range data.Results {
+							<li>
+								<a href={ templ.SafeURL(result.URL) }>
+									{ result.Title }
+								</a>
+							</li>
+						}
+					</ul>
+				</div>
+			}
+		}
+	}
+}
