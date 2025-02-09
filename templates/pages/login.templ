@@ -21,7 +21,7 @@ templ Login(pctx templates.PageContext) {
 			@components.Submit("Login")
 			<hr/>
 			<p class="has-text-centered">
-				<a href={ templates.URL("forgot_password") }>Forgot your password?</a>
+				<a href={ pctx.URL("forgot_password") }>Forgot your password?</a>
 			</p>
 		</form>
 	}

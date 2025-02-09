@@ -10,7 +10,7 @@ templ MetaTags(pctx templates.PageContext) {
 			" | " + pctx.GetTitle()
 		}
 	</title>
-	<link rel="icon" href={ string(templates.File("favicon.png")) }/>
+	<link rel="icon" href={ string(pctx.File("favicon.png")) }/>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -59,7 +59,7 @@ templ Search(pctx templates.PageContext) {
 					<h2 class="subtitle">Search</h2>
 					<p class="control">
 						<input
-							hx-get={ string(templates.URL("search")) }
+							hx-get={ string(pctx.URL("search")) }
 							hx-trigger="keyup changed delay:500ms"
 							hx-target="#results"
 							name="query"
@@ -91,7 +91,7 @@ templ Main(pctx templates.PageContext) {
 			<nav class="navbar is-dark">
 				<div class="container">
 					<div class="navbar-brand" hx-boost="true">
-						<a href={ templates.URL("home") } class="navbar-item">{ pctx.GetAppName() }</a>
+						<a href={ pctx.URL("home") } class="navbar-item">{ pctx.GetAppName() }</a>
 					</div>
 					<div id="navbarMenu" class="navbar-menu">
 						<div class="navbar-end">
@@ -107,36 +107,36 @@ templ Main(pctx templates.PageContext) {
 							<p class="menu-label">General</p>
 							<ul class="menu-list">
 								<li>
-									@templates.Link(string(templates.URL("home")), "Dashboard", pctx.GetPath())
+									@pctx.Link(string(pctx.URL("home")), "Dashboard", pctx.GetPath())
 								</li>
 								<li>
-									@templates.Link(string(templates.URL("about")), "About", pctx.GetPath())
+									@pctx.Link(string(pctx.URL("about")), "About", pctx.GetPath())
 								</li>
 								<li>
-									@templates.Link(string(templates.URL("contact")), "Contact", pctx.GetPath())
+									@pctx.Link(string(pctx.URL("contact")), "Contact", pctx.GetPath())
 								</li>
 								<li>
-									@templates.Link(string(templates.URL("cache")), "Cache", pctx.GetPath())
+									@pctx.Link(string(pctx.URL("cache")), "Cache", pctx.GetPath())
 								</li>
 								<li>
-									@templates.Link(string(templates.URL("task")), "Task", pctx.GetPath())
+									@pctx.Link(string(pctx.URL("task")), "Task", pctx.GetPath())
 								</li>
 							</ul>
 							<p class="menu-label">Account</p>
 							<ul class="menu-list">
 								if pctx.IsAuth() {
 									<li>
-										@templates.Link(string(templates.URL("logout")), "Logout", pctx.GetPath())
+										@pctx.Link(string(pctx.URL("logout")), "Logout", pctx.GetPath())
 									</li>
 								} else {
 									<li>
-										@templates.Link(string(templates.URL("login")), "Login", pctx.GetPath())
+										@pctx.Link(string(pctx.URL("login")), "Login", pctx.GetPath())
 									</li>
 									<li>
-										@templates.Link(string(templates.URL("register")), "Register", pctx.GetPath())
+										@pctx.Link(string(pctx.URL("register")), "Register", pctx.GetPath())
 									</li>
 									<li>
-										@templates.Link(string(templates.URL("forgot_password")), "Forgot password", pctx.GetPath())
+										@pctx.Link(string(pctx.URL("forgot_password")), "Forgot password", pctx.GetPath())
 									</li>
 								}
 							</ul>

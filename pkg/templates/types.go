@@ -3,13 +3,19 @@ package templates
 import (
 	"html/template"
 
+	"github.com/a-h/templ"
+
+	"github.com/brian-dlee/lab/ent"
 	"github.com/brian-dlee/lab/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/page"
 )
 
 // BaseContext defines the minimum interface required by all templates
 type BaseContext interface {
 	// IsAuth returns whether the user is authenticated
 	IsAuth() bool
+
+	GetAuthUser() *ent.User
 
 	// GetPath returns the current request path
 	GetPath() string
@@ -36,4 +42,12 @@ type PageContext interface {
 
 	// GetData returns the page-specific data
 	GetData() any
+
+	GetPager() page.Pager
+
+	URL(routeName string, params ...any) templ.SafeURL
+
+	File(file string) templ.SafeURL
+
+	Link(url, text, currentPath string, classes ...string) templ.Component
 }

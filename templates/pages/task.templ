@@ -18,7 +18,7 @@ templ Task(pctx templates.PageContext) {
 			</p>
 			<button
 				class="button is-primary"
-				hx-post={ string(templates.URL("task")) }
+				hx-post={ string(pctx.URL("task")) }
 				hx-swap="outerHTML"
 			>
 				Start task
@@ -43,14 +43,14 @@ templ TaskProgress(pctx templates.PageContext) {
 					<p>Task complete!</p>
 					<button
 						class="button is-primary"
-						hx-post={ string(templates.URL("task")) }
+						hx-post={ string(pctx.URL("task")) }
 						hx-swap="outerHTML"
 					>
 						Start new task
 					</button>
 				} else {
 					<div
-						hx-get={ string(templates.URL(("task"))) }
+						hx-get={ string(pctx.URL(("task"))) }
 						hx-trigger="load delay:1s"
 						hx-swap="outerHTML"
 					></div>

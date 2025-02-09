@@ -2,6 +2,7 @@ package pages
 
 import (
 	"github.com/brian-dlee/lab/pkg/htmx"
+	"github.com/brian-dlee/lab/pkg/models"
 	"github.com/brian-dlee/lab/pkg/templates"
 	"github.com/brian-dlee/lab/templates/components"
 	"github.com/brian-dlee/lab/templates/layouts"
@@ -30,46 +31,42 @@ type HomeData struct {
 
 // TopContent renders the hero section and title
 templ TopContent(pctx templates.PageContext) {
-	if data, ok := pctx.GetData().(HomeData); ok {
-		<section class="hero is-info welcome is-small">
-			<div class="hero-body">
-				<div class="container">
-					<h1 class="title">
-						Hello
-						if pctx.IsAuth() {
-							, { data.AuthUser.Name }
-						}
-					</h1>
-					<h2 class="subtitle">
-						if pctx.IsAuth() {
-							Welcome back!
-						} else {
-							Please login in to your account.
-						}
-					</h2>
-				</div>
+	<section class="hero is-info welcome is-small">
+		<div class="hero-body">
+			<div class="container">
+				<h1 class="title">
+					Hello
+					if pctx.IsAuth() {
+						, { pctx.GetAuthUser().Name }
+					}
+				</h1>
+				<h2 class="subtitle">
+					if pctx.IsAuth() {
+						Welcome back!
+					} else {
+						Please login in to your account.
+					}
+				</h2>
 			</div>
-		</section>
-		<section class="section">
-			<h1 class="title">Recent posts</h1>
-			<h2 class="subtitle">
-				Below is an example of both paging and AJAX fetching using HTMX
-			</h2>
-		</section>
-	} else {
-		<div>Failed TopContent</div>
-	}
+		</div>
+	</section>
+	<section class="section">
+		<h1 class="title">Recent posts</h1>
+		<h2 class="subtitle">
+			Below is an example of both paging and AJAX fetching using HTMX
+		</h2>
+	</section>
 }
 
 // Posts renders the list of posts with pagination
 templ Posts(pctx templates.PageContext) {
-	if data, ok := pctx.GetData().(HomeData); ok {
+	if posts, ok := pctx.GetData().([]models.Post); ok {
 		<div id="posts">
-			for _, post := range data.Data {
+			for _, post := range posts {
 				<article class="media">
 					<figure class="media-left">
 						<p class="image is-64x64">
-							<img src={ string(templates.File("gopher.png")) } alt="Gopher"/>
+							<img src={ string(pctx.File("gopher.png")) } alt="Gopher"/>
 						</p>
 					</figure>
 					<div class="media-content">
@@ -84,24 +81,25 @@ templ Posts(pctx templates.PageContext) {
 				</article>
 			}
 			<div class="field is-grouped is-grouped-centered">
-				if !data.Pager.IsBeginning {
+				{{ pager := pctx.GetPager() }}
+				if !pager.IsBeginning() {
 					<p class="control">
 						<button
 							class="button is-primary"
 							hx-swap="outerHTML"
-							hx-get={ "/?page=" + templates.Sub(data.Pager.Page, 1) }
+							hx-get={ "/?page=" + templates.Sub(pager.Page, 1) }
 							hx-target="#posts"
 						>
 							Previous page
 						</button>
 					</p>
 				}
-				if !data.Pager.IsEnd {
+				if !pager.IsEnd() {
 					<p class="control">
 						<button
 							class="button is-primary"
 							hx-swap="outerHTML"
-							hx-get={ "/?page=" + templates.Add(data.Pager.Page, 1) }
+							hx-get={ "/?page=" + templates.Add(pager.Page, 1) }
 							hx-target="#posts"
 						>
 							Next page

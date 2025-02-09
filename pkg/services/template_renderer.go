@@ -11,10 +11,12 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/brian-dlee/lab/config"
+	"github.com/brian-dlee/lab/ent"
 	"github.com/brian-dlee/lab/pkg/context"
 	"github.com/brian-dlee/lab/pkg/log"
 	"github.com/brian-dlee/lab/pkg/msg"
 	"github.com/brian-dlee/lab/pkg/page"
+	pkgtemplates "github.com/brian-dlee/lab/pkg/templates"
 	"github.com/brian-dlee/lab/templates"
 	"github.com/brian-dlee/lab/templates/pages"
 )
@@ -31,6 +33,9 @@ type (
 
 		// cache stores the cache client
 		cache *CacheClient
+
+		// fm funcmap
+		fm *pkgtemplates.FuncMap
 	}
 
 	// CachedPage is what is used to store a rendered Page in the cache
@@ -50,10 +55,11 @@ type (
 )
 
 // NewTemplateRenderer creates a new TemplateRenderer
-func NewTemplateRenderer(cfg *config.Config, cache *CacheClient) *TemplateRenderer {
+func NewTemplateRenderer(cfg *config.Config, cache *CacheClient, fm *pkgtemplates.FuncMap) *TemplateRenderer {
 	return &TemplateRenderer{
 		config: cfg,
 		cache:  cache,
+		fm:     fm,
 	}
 }
 
@@ -70,7 +76,7 @@ func (t *TemplateRenderer) RenderPage(page page.Page) error {
 	}
 
 	// Create page context for templ components
-	pageCtx := &pageContext{page: page}
+	pageCtx := &pageContext{page: page, fm: t.fm}
 
 	// Check if this is an HTMX non-boosted request which indicates that only partial
 	// content should be rendered
@@ -213,10 +219,15 @@ func (t *TemplateRenderer) getCacheKey(group, key string) string {
 // pageContext implements templates.PageContext
 type pageContext struct {
 	page page.Page
+	fm   *pkgtemplates.FuncMap
 }
 
 func (c *pageContext) IsAuth() bool {
 	return c.page.IsAuth
+}
+
+func (c *pageContext) GetAuthUser() *ent.User {
+	return c.page.AuthUser
 }
 
 func (c *pageContext) GetPath() string {
@@ -245,4 +256,20 @@ func (c *pageContext) GetHTMXRequest() any {
 
 func (c *pageContext) GetData() any {
 	return c.page.Data
+}
+
+func (c *pageContext) GetPager() page.Pager {
+	return c.page.Pager
+}
+
+func (c *pageContext) URL(routeName string, params ...any) templ.SafeURL {
+	return c.fm.URL(routeName, params...)
+}
+
+func (c *pageContext) File(filename string) templ.SafeURL {
+	return c.fm.File(filename)
+}
+
+func (c *pageContext) Link(url, text, currentPath string, classes ...string) templ.Component {
+	return c.fm.Link(url, text, currentPath, classes...)
 }

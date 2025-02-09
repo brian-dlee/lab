@@ -4,53 +4,46 @@ import (
 	"fmt"
 
 	"github.com/a-h/templ"
-	"github.com/mikestefanello/pagoda/config"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/random"
+
+	"github.com/brian-dlee/lab/config"
 )
 
 var (
-	// CacheBuster is a random string that changes on each app restart
-	// to force browsers to download new versions of static files
-	CacheBuster string
-
-	// web is the web interface for URL generation
-	web interface {
-		Reverse(name string, params ...any) string
-	}
+	DefaultCacheBuster = random.String(10)
 )
 
-// SetWeb sets the web interface for URL generation
-func SetWeb(w interface{ Reverse(name string, params ...any) string }) {
-	web = w
+type FuncMap struct {
+	web         *echo.Echo
+	cacheBuster string
 }
 
-// SetCacheBuster sets the cache buster string
-func SetCacheBuster(cb string) {
-	CacheBuster = cb
+// NewFuncMap provides a template function map
+func NewFuncMap(web *echo.Echo, cacheBuster string) *FuncMap {
+	return &FuncMap{web: web, cacheBuster: cacheBuster}
 }
 
-// url generates a URL from a given route name and optional parameters
-func url(routeName string, params ...any) templ.SafeURL {
-	if web == nil {
-		panic("web interface not set")
-	}
-	return templ.URL(web.Reverse(routeName, params...))
+// URL generates a URL from a given route name and optional parameters
+func (fm *FuncMap) URL(routeName string, params ...any) templ.SafeURL {
+	return templ.URL(fm.web.Reverse(routeName, params...))
 }
 
-// file appends a cache buster to a given filepath
-func file(filepath string) templ.SafeURL {
-	return templ.URL(fmt.Sprintf("/%s/%s?v=%s", config.StaticPrefix, filepath, CacheBuster))
+// File appends a cache buster to a given filepath
+func (fm *FuncMap) File(filepath string) templ.SafeURL {
+	return templ.URL(fmt.Sprintf("/%s/%s?v=%s", config.StaticPrefix, filepath, fm.cacheBuster))
 }
 
-// link outputs HTML for a link element with active class support
-func link(url, text, currentPath string, classes ...string) templ.Component {
+// Link outputs HTML for a Link element with active class support
+func (fm *FuncMap) Link(url, text, currentPath string, classes ...string) templ.Component {
 	activeClass := ""
 	if currentPath == url {
 		activeClass = " is-active"
 	}
-	
-	return templ.Raw(fmt.Sprintf(`<a href="%s" class="%s%s">%s</a>`, 
-		url, 
-		templ.EscapeString(joinClasses(classes...)), 
+
+	return templ.Raw(fmt.Sprintf(`<a href="%s" class="%s%s">%s</a>`,
+		url,
+		templ.EscapeString(joinClasses(classes...)),
 		activeClass,
 		templ.EscapeString(text)))
 }
@@ -67,12 +60,12 @@ func joinClasses(classes ...string) string {
 	return result
 }
 
-// add adds two integers for use in templates
-func add(a, b int) string {
+// Add adds two integers for use in templates
+func Add(a, b int) string {
 	return fmt.Sprintf("%d", a+b)
 }
 
-// sub subtracts two integers for use in templates
-func sub(a, b int) string {
+// Sub subtracts two integers for use in templates
+func Sub(a, b int) string {
 	return fmt.Sprintf("%d", a-b)
 }
