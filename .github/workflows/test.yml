@@ -33,5 +33,8 @@ jobs:
     - name: Just Install
       run: just install
 
+    - name: Just Generate
+      run: just gen
+
     - name: Test
       run: just test
