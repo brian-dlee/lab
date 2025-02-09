@@ -1,20 +1,18 @@
 package services
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"html/template"
-	"io/fs"
+	"io"
 	"net/http"
-	"sync"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/mikestefanello/pagoda/config"
 	"github.com/mikestefanello/pagoda/pkg/context"
 	"github.com/mikestefanello/pagoda/pkg/log"
+	"github.com/mikestefanello/pagoda/pkg/msg"
 	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/templates"
+	"github.com/mikestefanello/pagoda/templates/pages"
 )
 
 // cachedPageGroup stores the cache group for cached pages

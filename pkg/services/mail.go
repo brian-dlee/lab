@@ -67,20 +67,9 @@ func (m *MailClient) send(email *mail, ctx echo.Context) error {
 
 	// Check if a template was supplied
 	if email.template != "" {
-		// Parse and execute template
-		buf, err := m.templates.
-			Parse().
-			Group("mail").
-			Key(email.template).
-			Base(email.template).
-			Files(fmt.Sprintf("emails/%s", email.template)).
-			Execute(email.templateData)
-
-		if err != nil {
-			return err
-		}
-
-		email.body = buf.String()
+		// TODO: Implement email template rendering with templ
+		log.Ctx(ctx).Warn("email template rendering not yet implemented")
+		email.body = "Email template rendering not yet implemented"
 	}
 
 	// Check if mail sending should be skipped
