@@ -1,2 +1,3 @@
 .idea
-dbs
+dbs# Templ generated files
+**/*_templ.go
