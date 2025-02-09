@@ -1,0 +1,53 @@
+package pages
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/mikestefanello/pagoda/templates/layouts"
+	"github.com/mikestefanello/pagoda/templates/components"
+)
+
+// Task renders the task demo page
+templ Task(ctx templates.PageContext) {
+	@layouts.Main(ctx) {
+		@components.Messages(ctx)
+		<div class="content">
+			<p>
+				This page demonstrates background task processing.
+				Click the button below to start a task that will run for 10 seconds.
+			</p>
+			<button 
+				class="button is-primary" 
+				hx-post={ url("task") }
+				hx-swap="outerHTML"
+			>
+				Start task
+			</button>
+		</div>
+	}
+}
+
+// TaskProgress renders the task progress for HTMX requests
+templ TaskProgress(ctx templates.PageContext) {
+	@layouts.HTMX(ctx) {
+		<div class="content">
+			<p>Task is running...</p>
+			<progress class="progress is-primary" max="100" value={ ctx.GetData().(map[string]interface{})["Progress"].(float64) }></progress>
+			if ctx.GetData().(map[string]interface{})["Complete"].(bool) {
+				<p>Task complete!</p>
+				<button 
+					class="button is-primary" 
+					hx-post={ url("task") }
+					hx-swap="outerHTML"
+				>
+					Start new task
+				</button>
+			} else {
+				<div 
+					hx-get={ url("task") }
+					hx-trigger="load delay:1s"
+					hx-swap="outerHTML"
+				></div>
+			}
+		</div>
+	}
+}

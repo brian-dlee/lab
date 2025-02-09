@@ -1,0 +1,19 @@
+package pages
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/mikestefanello/pagoda/templates/layouts"
+	"github.com/mikestefanello/pagoda/templates/components"
+)
+
+// Error renders the error page
+templ Error(ctx templates.PageContext) {
+	@layouts.Main(ctx) {
+		@components.Messages(ctx)
+		<div class="content">
+			<p>
+				An error has occurred. Please try again or contact us if the problem persists.
+			</p>
+		</div>
+	}
+}

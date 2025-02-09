@@ -1,0 +1,20 @@
+package pages
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/mikestefanello/pagoda/templates/layouts"
+	"github.com/mikestefanello/pagoda/templates/components"
+)
+
+// About renders the about page
+templ About(ctx templates.PageContext) {
+	@layouts.Main(ctx) {
+		@components.Messages(ctx)
+		<div class="content">
+			<p>
+				This is a sample application built using Go and the Echo framework.
+				It demonstrates various features and best practices for building web applications.
+			</p>
+		</div>
+	}
+}

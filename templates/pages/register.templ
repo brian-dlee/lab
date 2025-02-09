@@ -1,0 +1,35 @@
+package pages
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/mikestefanello/pagoda/templates/layouts"
+	"github.com/mikestefanello/pagoda/templates/components"
+)
+
+// Register renders the registration page
+templ Register(ctx templates.PageContext) {
+	@layouts.Auth(ctx) {
+		@components.Messages(ctx)
+		<form method="post">
+			<input type="hidden" name="csrf" value={ ctx.GetCSRF() }/>
+			
+			@components.FormField(ctx, "name", "Name", true) {
+				@components.TextInput("name", "", "text")
+			}
+			
+			@components.FormField(ctx, "email", "Email", true) {
+				@components.TextInput("email", "", "email")
+			}
+			
+			@components.FormField(ctx, "password", "Password", true) {
+				@components.TextInput("password", "", "password")
+			}
+			
+			@components.FormField(ctx, "password_confirm", "Confirm password", true) {
+				@components.TextInput("password_confirm", "", "password")
+			}
+			
+			@components.Submit("Register")
+		</form>
+	}
+}

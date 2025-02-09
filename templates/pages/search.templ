@@ -1,0 +1,27 @@
+package pages
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/mikestefanello/pagoda/templates/layouts"
+)
+
+// SearchResults renders the search results for HTMX requests
+templ SearchResults(ctx templates.PageContext) {
+	@layouts.HTMX(ctx) {
+		if len(ctx.GetData().(map[string]interface{})["Results"].([]interface{})) == 0 {
+			<p>No results found.</p>
+		} else {
+			<div class="menu">
+				<ul class="menu-list">
+					for _, result := range ctx.GetData().(map[string]interface{})["Results"].([]interface{}) {
+						<li>
+							<a href={ templ.SafeURL(result.(map[string]interface{})["URL"].(string)) }>
+								{ result.(map[string]interface{})["Title"].(string) }
+							</a>
+						</li>
+					}
+				</ul>
+			</div>
+		}
+	}
+}
