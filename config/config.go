@@ -10,7 +10,7 @@ import (
 
 const (
 	// TemplateExt stores the extension used for the template files
-	TemplateExt = ".gohtml"
+	TemplateExt = ".templ"
 
 	// StaticDir stores the name of the directory that will serve static files
 	StaticDir = "static"
@@ -134,7 +134,6 @@ func GetConfig() (Config, error) {
 	viper.AddConfigPath("../../config")
 
 	// Load env variables
-	viper.SetEnvPrefix("pagoda")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 

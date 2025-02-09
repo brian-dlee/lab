@@ -1,13 +1,16 @@
 package layouts
 
-import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-)
+import "github.com/brian-dlee/lab/pkg/templates"
 
 // MetaTags renders the meta tags in the head section
-templ MetaTags(ctx templates.PageContext) {
-	<title>{ ctx.GetAppName() }{ if ctx.GetTitle() != "" } | { ctx.GetTitle() }{ end }</title>
-	<link rel="icon" href={ templ.SafeURL(file("favicon.png")) }/>
+templ MetaTags(pctx templates.PageContext) {
+	<title>
+		{ pctx.GetAppName() }
+		if pctx.GetTitle() != "" {
+			" | " + pctx.GetTitle()
+		}
+	</title>
+	<link rel="icon" href={ string(templates.File("favicon.png")) }/>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -25,8 +28,8 @@ templ JS() {
 }
 
 // Footer renders the footer section with CSRF and HTMX scripts
-templ Footer(ctx templates.PageContext) {
-	if ctx.GetCSRF() != "" {
+templ Footer(pctx templates.PageContext) {
+	if pctx.GetCSRF() != "" {
 		<script>
 			document.body.addEventListener('htmx:configRequest', function(evt)  {
 				if (evt.detail.verb !== "get") {
@@ -46,7 +49,7 @@ templ Footer(ctx templates.PageContext) {
 }
 
 // Search renders the search modal component
-templ Search(ctx templates.PageContext) {
+templ Search(pctx templates.PageContext) {
 	<div class="search mr-2 mt-1" x-data="{modal:false}">
 		<input class="input" type="search" placeholder="Search..." @click="modal = true; $nextTick(() => $refs.input.focus());"/>
 		<div class="modal" :class="modal ? 'is-active' : ''" x-show="modal == true">
@@ -56,7 +59,7 @@ templ Search(ctx templates.PageContext) {
 					<h2 class="subtitle">Search</h2>
 					<p class="control">
 						<input
-							hx-get={ url("search") }
+							hx-get={ string(templates.URL("search")) }
 							hx-trigger="keyup changed delay:500ms"
 							hx-target="#results"
 							name="query"
@@ -76,11 +79,11 @@ templ Search(ctx templates.PageContext) {
 }
 
 // Main renders the main layout template
-templ Main(ctx templates.PageContext) {
+templ Main(pctx templates.PageContext) {
 	<!DOCTYPE html>
 	<html lang="en" style="height:100%;">
 		<head>
-			@MetaTags(ctx)
+			@MetaTags(pctx)
 			@CSS()
 			@JS()
 		</head>
@@ -88,55 +91,68 @@ templ Main(ctx templates.PageContext) {
 			<nav class="navbar is-dark">
 				<div class="container">
 					<div class="navbar-brand" hx-boost="true">
-						<a href={ templ.SafeURL(url("home")) } class="navbar-item">{ ctx.GetAppName() }</a>
+						<a href={ templates.URL("home") } class="navbar-item">{ pctx.GetAppName() }</a>
 					</div>
 					<div id="navbarMenu" class="navbar-menu">
 						<div class="navbar-end">
-							@Search(ctx)
+							@Search(pctx)
 						</div>
 					</div>
 				</div>
 			</nav>
-
 			<div class="container mt-5">
 				<div class="columns">
 					<div class="column is-2">
 						<aside class="menu" hx-boost="true">
 							<p class="menu-label">General</p>
 							<ul class="menu-list">
-								<li>{ link(url("home"), "Dashboard", ctx.GetPath()) }</li>
-								<li>{ link(url("about"), "About", ctx.GetPath()) }</li>
-								<li>{ link(url("contact"), "Contact", ctx.GetPath()) }</li>
-								<li>{ link(url("cache"), "Cache", ctx.GetPath()) }</li>
-								<li>{ link(url("task"), "Task", ctx.GetPath()) }</li>
+								<li>
+									@templates.Link(string(templates.URL("home")), "Dashboard", pctx.GetPath())
+								</li>
+								<li>
+									@templates.Link(string(templates.URL("about")), "About", pctx.GetPath())
+								</li>
+								<li>
+									@templates.Link(string(templates.URL("contact")), "Contact", pctx.GetPath())
+								</li>
+								<li>
+									@templates.Link(string(templates.URL("cache")), "Cache", pctx.GetPath())
+								</li>
+								<li>
+									@templates.Link(string(templates.URL("task")), "Task", pctx.GetPath())
+								</li>
 							</ul>
-
 							<p class="menu-label">Account</p>
 							<ul class="menu-list">
-								if ctx.IsAuth() {
-									<li>{ link(url("logout"), "Logout", ctx.GetPath()) }</li>
+								if pctx.IsAuth() {
+									<li>
+										@templates.Link(string(templates.URL("logout")), "Logout", pctx.GetPath())
+									</li>
 								} else {
-									<li>{ link(url("login"), "Login", ctx.GetPath()) }</li>
-									<li>{ link(url("register"), "Register", ctx.GetPath()) }</li>
-									<li>{ link(url("forgot_password"), "Forgot password", ctx.GetPath()) }</li>
+									<li>
+										@templates.Link(string(templates.URL("login")), "Login", pctx.GetPath())
+									</li>
+									<li>
+										@templates.Link(string(templates.URL("register")), "Register", pctx.GetPath())
+									</li>
+									<li>
+										@templates.Link(string(templates.URL("forgot_password")), "Forgot password", pctx.GetPath())
+									</li>
 								}
 							</ul>
 						</aside>
 					</div>
-
 					<div class="column is-10">
 						<div class="box">
-							if ctx.GetTitle() != "" {
-								<h1 class="title">{ ctx.GetTitle() }</h1>
+							if pctx.GetTitle() != "" {
+								<h1 class="title">{ pctx.GetTitle() }</h1>
 							}
-
 							{ children... }
 						</div>
 					</div>
 				</div>
 			</div>
-
-			@Footer(ctx)
+			@Footer(pctx)
 		</body>
 	</html>
 }

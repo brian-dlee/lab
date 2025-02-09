@@ -1,3 +1,7 @@
-.idea
-dbs# Templ generated files
+/.data
+/.local
+
+/dbs
+
+**/*_templ.txt
 **/*_templ.go

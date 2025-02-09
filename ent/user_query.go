@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/mikestefanello/pagoda/ent/passwordtoken"
-	"github.com/mikestefanello/pagoda/ent/predicate"
-	"github.com/mikestefanello/pagoda/ent/user"
+	"github.com/brian-dlee/lab/ent/passwordtoken"
+	"github.com/brian-dlee/lab/ent/predicate"
+	"github.com/brian-dlee/lab/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.

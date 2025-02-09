@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"errors"
+	"github.com/brian-dlee/lab/pkg/form"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/form"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 	"time"
 )
 
@@ -64,7 +64,7 @@ func (h *Cache) Page(ctx echo.Context) error {
 		return fail(err, "failed to fetch from cache")
 	}
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Cache) Submit(ctx echo.Context) error {

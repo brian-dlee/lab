@@ -1,24 +1,30 @@
 package pages
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-	"github.com/mikestefanello/pagoda/templates/layouts"
-	"github.com/mikestefanello/pagoda/templates/components"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
 )
 
+type CacheData struct {
+	Time string
+}
+
 // Cache renders the cache demo page
-templ Cache(ctx templates.PageContext) {
-	@layouts.Main(ctx) {
-		@components.Messages(ctx)
-		<div class="content">
-			<p>
-				This page demonstrates caching functionality.
-				The response of this page is cached for 10 seconds.
-				Refresh to see the same content until the cache expires.
-			</p>
-			<p>
-				Current time: { ctx.GetData().(map[string]interface{})["Time"].(string) }
-			</p>
-		</div>
+templ Cache(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(CacheData); ok {
+		@layouts.Main(pctx) {
+			@components.Messages(pctx)
+			<div class="content">
+				<p>
+					This page demonstrates caching functionality.
+					The response of this page is cached for 10 seconds.
+					Refresh to see the same content until the cache expires.
+				</p>
+				<p>
+					Current time: { data.Time }
+				</p>
+			</div>
+		}
 	}
 }

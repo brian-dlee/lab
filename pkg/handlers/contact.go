@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/brian-dlee/lab/pkg/form"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/pkg/services"
+	"github.com/brian-dlee/lab/templates"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/form"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/pkg/services"
-	"github.com/mikestefanello/pagoda/templates"
 )
 
 const (
@@ -51,7 +51,7 @@ func (h *Contact) Page(ctx echo.Context) error {
 	p.Title = "Contact us"
 	p.Form = form.Get[contactForm](ctx)
 
-	return h.RenderPage(ctx, p)
+	return h.RenderPage(p)
 }
 
 func (h *Contact) Submit(ctx echo.Context) error {

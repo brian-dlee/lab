@@ -1,18 +1,22 @@
 package services
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/config"
-	"github.com/mikestefanello/pagoda/pkg/context"
-	"github.com/mikestefanello/pagoda/pkg/log"
-	"github.com/mikestefanello/pagoda/pkg/msg"
-	"github.com/mikestefanello/pagoda/pkg/page"
-	"github.com/mikestefanello/pagoda/templates/pages"
+
+	"github.com/brian-dlee/lab/config"
+	"github.com/brian-dlee/lab/pkg/context"
+	"github.com/brian-dlee/lab/pkg/log"
+	"github.com/brian-dlee/lab/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/page"
+	"github.com/brian-dlee/lab/templates"
+	"github.com/brian-dlee/lab/templates/pages"
 )
 
 // cachedPageGroup stores the cache group for cached pages
@@ -54,7 +58,7 @@ func NewTemplateRenderer(cfg *config.Config, cache *CacheClient) *TemplateRender
 }
 
 // RenderPage renders a Page as an HTTP response using templ components
-func (t *TemplateRenderer) RenderPage(ctx echo.Context, page page.Page) error {
+func (t *TemplateRenderer) RenderPage(page page.Page) error {
 	// Page name is required
 	if page.Name == "" {
 		return echo.NewHTTPError(http.StatusInternalServerError, "page render failed due to missing name")
@@ -77,19 +81,19 @@ func (t *TemplateRenderer) RenderPage(ctx echo.Context, page page.Page) error {
 
 	// Create a buffer to capture the rendered HTML for caching
 	buf := new(bytes.Buffer)
-	writer := io.MultiWriter(ctx.Response().Writer, buf)
+	writer := io.MultiWriter(page.Context.Response().Writer, buf)
 
 	// Set the status code
-	ctx.Response().Status = page.StatusCode
+	page.Context.Response().Status = page.StatusCode
 
 	// Set any headers
 	for k, v := range page.Headers {
-		ctx.Response().Header().Set(k, v)
+		page.Context.Response().Header().Set(k, v)
 	}
 
 	// Apply the HTMX response, if one
 	if page.HTMX.Response != nil {
-		page.HTMX.Response.Apply(ctx)
+		page.HTMX.Response.Apply(page.Context)
 	}
 
 	// Render the appropriate component based on the page name
@@ -126,13 +130,13 @@ func (t *TemplateRenderer) RenderPage(ctx echo.Context, page page.Page) error {
 	}
 
 	// Render the component
-	err := component.Render(ctx.Request().Context(), writer)
+	err := component.Render(page.Context.Request().Context(), writer)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to render template: %s", err))
 	}
 
 	// Cache this page, if caching was enabled
-	t.cachePage(ctx, page, buf)
+	t.cachePage(page.Context, page, buf)
 
 	return nil
 }

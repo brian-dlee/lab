@@ -3,11 +3,11 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/brian-dlee/lab/config"
+	"github.com/brian-dlee/lab/pkg/middleware"
+	"github.com/brian-dlee/lab/pkg/services"
 	"github.com/gorilla/sessions"
 	echomw "github.com/labstack/echo/v4/middleware"
-	"github.com/mikestefanello/pagoda/config"
-	"github.com/mikestefanello/pagoda/pkg/middleware"
-	"github.com/mikestefanello/pagoda/pkg/services"
 )
 
 // BuildRouter builds the router

@@ -9,7 +9,7 @@ import (
 	"github.com/Masterminds/sprig"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
-	"github.com/mikestefanello/pagoda/config"
+	"github.com/brian-dlee/lab/config"
 )
 
 var (

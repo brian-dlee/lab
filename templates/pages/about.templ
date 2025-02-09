@@ -1,15 +1,15 @@
 package pages
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-	"github.com/mikestefanello/pagoda/templates/layouts"
-	"github.com/mikestefanello/pagoda/templates/components"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
 )
 
 // About renders the about page
-templ About(ctx templates.PageContext) {
-	@layouts.Main(ctx) {
-		@components.Messages(ctx)
+templ About(pctx templates.PageContext) {
+	@layouts.Main(pctx) {
+		@components.Messages(pctx)
 		<div class="content">
 			<p>
 				This is a sample application built using Go and the Echo framework.

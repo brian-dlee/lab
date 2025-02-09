@@ -3,7 +3,7 @@ package templates
 import (
 	"html/template"
 
-	"github.com/mikestefanello/pagoda/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/msg"
 )
 
 // BaseContext defines the minimum interface required by all templates

@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/pagoda/pkg/services"
+	"github.com/brian-dlee/lab/pkg/services"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

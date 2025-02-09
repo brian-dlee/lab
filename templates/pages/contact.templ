@@ -1,30 +1,26 @@
 package pages
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-	"github.com/mikestefanello/pagoda/templates/layouts"
-	"github.com/mikestefanello/pagoda/templates/components"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
 )
 
 // Contact renders the contact page with a contact form
-templ Contact(ctx templates.PageContext) {
-	@layouts.Main(ctx) {
-		@components.Messages(ctx)
+templ Contact(pctx templates.PageContext) {
+	@layouts.Main(pctx) {
+		@components.Messages(pctx)
 		<form method="post">
-			<input type="hidden" name="csrf" value={ ctx.GetCSRF() }/>
-			
-			@components.FormField(ctx, "name", "Name", true) {
+			<input type="hidden" name="csrf" value={ pctx.GetCSRF() }/>
+			@components.FormField(pctx, "name", "Name", true) {
 				@components.TextInput("name", "", "text")
 			}
-			
-			@components.FormField(ctx, "email", "Email", true) {
+			@components.FormField(pctx, "email", "Email", true) {
 				@components.TextInput("email", "", "email")
 			}
-			
-			@components.FormField(ctx, "message", "Message", true) {
+			@components.FormField(pctx, "message", "Message", true) {
 				@components.TextArea("message", "")
 			}
-			
 			@components.Submit("Send message")
 		</form>
 	}

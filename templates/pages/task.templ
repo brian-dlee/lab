@@ -1,23 +1,24 @@
 package pages
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-	"github.com/mikestefanello/pagoda/templates/layouts"
-	"github.com/mikestefanello/pagoda/templates/components"
+	"fmt"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
 )
 
 // Task renders the task demo page
-templ Task(ctx templates.PageContext) {
-	@layouts.Main(ctx) {
-		@components.Messages(ctx)
+templ Task(pctx templates.PageContext) {
+	@layouts.Main(pctx) {
+		@components.Messages(pctx)
 		<div class="content">
 			<p>
 				This page demonstrates background task processing.
 				Click the button below to start a task that will run for 10 seconds.
 			</p>
-			<button 
-				class="button is-primary" 
-				hx-post={ url("task") }
+			<button
+				class="button is-primary"
+				hx-post={ string(templates.URL("task")) }
 				hx-swap="outerHTML"
 			>
 				Start task
@@ -26,28 +27,35 @@ templ Task(ctx templates.PageContext) {
 	}
 }
 
+type TaskProgressData struct {
+	Progress float64
+	Complete bool
+}
+
 // TaskProgress renders the task progress for HTMX requests
-templ TaskProgress(ctx templates.PageContext) {
-	@layouts.HTMX(ctx) {
-		<div class="content">
-			<p>Task is running...</p>
-			<progress class="progress is-primary" max="100" value={ ctx.GetData().(map[string]interface{})["Progress"].(float64) }></progress>
-			if ctx.GetData().(map[string]interface{})["Complete"].(bool) {
-				<p>Task complete!</p>
-				<button 
-					class="button is-primary" 
-					hx-post={ url("task") }
-					hx-swap="outerHTML"
-				>
-					Start new task
-				</button>
-			} else {
-				<div 
-					hx-get={ url("task") }
-					hx-trigger="load delay:1s"
-					hx-swap="outerHTML"
-				></div>
-			}
-		</div>
+templ TaskProgress(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(TaskProgressData); ok {
+		@layouts.LayoutHTMX(pctx) {
+			<div class="content">
+				<p>Task is running...</p>
+				<progress class="progress is-primary" max="100" value={ fmt.Sprintf("%f", data.Progress) }></progress>
+				if data.Complete {
+					<p>Task complete!</p>
+					<button
+						class="button is-primary"
+						hx-post={ string(templates.URL("task")) }
+						hx-swap="outerHTML"
+					>
+						Start new task
+					</button>
+				} else {
+					<div
+						hx-get={ string(templates.URL(("task"))) }
+						hx-trigger="load delay:1s"
+						hx-swap="outerHTML"
+					></div>
+				}
+			</div>
+		}
 	}
 }

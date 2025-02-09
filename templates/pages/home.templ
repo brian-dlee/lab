@@ -1,90 +1,118 @@
 package pages
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-	"github.com/mikestefanello/pagoda/templates/layouts"
-	"github.com/mikestefanello/pagoda/templates/components"
+	"github.com/brian-dlee/lab/pkg/htmx"
+	"github.com/brian-dlee/lab/pkg/templates"
+	"github.com/brian-dlee/lab/templates/components"
+	"github.com/brian-dlee/lab/templates/layouts"
 )
 
-// TopContent renders the hero section and title
-templ TopContent(ctx templates.PageContext) {
-	<section class="hero is-info welcome is-small">
-		<div class="hero-body">
-			<div class="container">
-				<h1 class="title">
-					Hello
-					if ctx.IsAuth() {
-						, { ctx.GetData().(map[string]interface{})["AuthUser"].(map[string]interface{})["Name"].(string) }
-					}
-				</h1>
-				<h2 class="subtitle">
-					if ctx.IsAuth() {
-						Welcome back!
-					} else {
-						Please login in to your account.
-					}
-				</h2>
-			</div>
-		</div>
-	</section>
+type HomeDataAuthUser struct {
+	Name string
+}
 
-	<section class="section">
-		<h1 class="title">Recent posts</h1>
-		<h2 class="subtitle">
-			Below is an example of both paging and AJAX fetching using HTMX
-		</h2>
-	</section>
+type HomeDataPost struct {
+	Title string
+	Body  string
+}
+
+type HomeDataPager struct {
+	IsBeginning bool
+	IsEnd       bool
+	Page        int
+}
+
+type HomeData struct {
+	AuthUser HomeDataAuthUser
+	Data     []HomeDataPost
+	Pager    HomeDataPager
+}
+
+// TopContent renders the hero section and title
+templ TopContent(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(HomeData); ok {
+		<section class="hero is-info welcome is-small">
+			<div class="hero-body">
+				<div class="container">
+					<h1 class="title">
+						Hello
+						if pctx.IsAuth() {
+							, { data.AuthUser.Name }
+						}
+					</h1>
+					<h2 class="subtitle">
+						if pctx.IsAuth() {
+							Welcome back!
+						} else {
+							Please login in to your account.
+						}
+					</h2>
+				</div>
+			</div>
+		</section>
+		<section class="section">
+			<h1 class="title">Recent posts</h1>
+			<h2 class="subtitle">
+				Below is an example of both paging and AJAX fetching using HTMX
+			</h2>
+		</section>
+	} else {
+		<div>Failed TopContent</div>
+	}
 }
 
 // Posts renders the list of posts with pagination
-templ Posts(ctx templates.PageContext) {
-	<div id="posts">
-		for _, post := range ctx.GetData().(map[string]interface{})["Data"].([]interface{}) {
-			<article class="media">
-				<figure class="media-left">
-					<p class="image is-64x64">
-						<img src={ templ.SafeURL(file("gopher.png")) } alt="Gopher"/>
-					</p>
-				</figure>
-				<div class="media-content">
-					<div class="content">
-						<p>
-							<strong>{ post.(map[string]interface{})["Title"].(string) }</strong>
-							<br/>
-							{ post.(map[string]interface{})["Body"].(string) }
+templ Posts(pctx templates.PageContext) {
+	if data, ok := pctx.GetData().(HomeData); ok {
+		<div id="posts">
+			for _, post := range data.Data {
+				<article class="media">
+					<figure class="media-left">
+						<p class="image is-64x64">
+							<img src={ string(templates.File("gopher.png")) } alt="Gopher"/>
 						</p>
+					</figure>
+					<div class="media-content">
+						<div class="content">
+							<p>
+								<strong>{ post.Title }</strong>
+								<br/>
+								{ post.Body }
+							</p>
+						</div>
 					</div>
-				</div>
-			</article>
-		}
-
-		<div class="field is-grouped is-grouped-centered">
-			if !ctx.GetData().(map[string]interface{})["Pager"].(map[string]interface{})["IsBeginning"].(bool) {
-				<p class="control">
-					<button 
-						class="button is-primary" 
-						hx-swap="outerHTML" 
-						hx-get={ "/?page=" + sub(ctx.GetData().(map[string]interface{})["Pager"].(map[string]interface{})["Page"].(int), 1) } 
-						hx-target="#posts"
-					>
-						Previous page
-					</button>
-				</p>
+				</article>
 			}
-			if !ctx.GetData().(map[string]interface{})["Pager"].(map[string]interface{})["IsEnd"].(bool) {
-				<p class="control">
-					<button 
-						class="button is-primary" 
-						hx-swap="outerHTML" 
-						hx-get={ "/?page=" + add(ctx.GetData().(map[string]interface{})["Pager"].(map[string]interface{})["Page"].(int), 1) } 
-						hx-target="#posts"
-					>
-						Next page
-					</button>
-				</p>
-			}
+			<div class="field is-grouped is-grouped-centered">
+				if !data.Pager.IsBeginning {
+					<p class="control">
+						<button
+							class="button is-primary"
+							hx-swap="outerHTML"
+							hx-get={ "/?page=" + templates.Sub(data.Pager.Page, 1) }
+							hx-target="#posts"
+						>
+							Previous page
+						</button>
+					</p>
+				}
+				if !data.Pager.IsEnd {
+					<p class="control">
+						<button
+							class="button is-primary"
+							hx-swap="outerHTML"
+							hx-get={ "/?page=" + templates.Add(data.Pager.Page, 1) }
+							hx-target="#posts"
+						>
+							Next page
+						</button>
+					</p>
+				}
+			</div>
 		</div>
-	</div>
+	} else {
+		<div>Failed Posts</div>
+	}
 }
 
 // FileMsg renders the file message component
@@ -104,15 +132,20 @@ templ FileMsg() {
 }
 
 // Home renders the home page
-templ Home(ctx templates.PageContext) {
-	@layouts.Main(ctx) {
-		@components.Messages(ctx)
-		if ctx.GetHTMXRequest().(map[string]interface{})["Target"] != "posts" {
-			@TopContent(ctx)
+templ Home(pctx templates.PageContext) {
+	{{ data := htmx.Request{} }}
+	if true {
+		@layouts.Main(pctx) {
+			@components.Messages(pctx)
+			if data.Target != "posts" {
+				@TopContent(pctx)
+			}
+			@Posts(pctx)
+			if data.Target != "posts" {
+				@FileMsg()
+			}
 		}
-		@Posts(ctx)
-		if ctx.GetHTMXRequest().(map[string]interface{})["Target"] != "posts" {
-			@FileMsg()
-		}
+	} else {
+		<div>Failed HTMX Request</div>
 	}
 }

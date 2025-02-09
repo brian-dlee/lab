@@ -1,14 +1,14 @@
 package components
 
 import (
-	"github.com/mikestefanello/pagoda/pkg/msg"
-	"github.com/mikestefanello/pagoda/pkg/templates"
+	"github.com/brian-dlee/lab/pkg/msg"
+	"github.com/brian-dlee/lab/pkg/templates"
 )
 
 // Messages renders flash messages for a given type
-templ Messages(ctx templates.PageContext) {
-	for _, msgType := range []msg.Type{msg.TypeSuccess, msg.TypeError, msg.TypeWarning, msg.TypeInfo} {
-		for _, message := range ctx.GetMessages(msgType) {
+templ Messages(pctx templates.PageContext) {
+	for _, msgType := range []msg.Type{msg.TypeSuccess, msg.TypeDanger, msg.TypeWarning, msg.TypeInfo} {
+		for _, message := range pctx.GetMessages(msgType) {
 			<article class={ "message", getMessageClass(msgType) }>
 				<div class="message-body">
 					@templ.Raw(string(message))
@@ -23,7 +23,7 @@ func getMessageClass(typ msg.Type) string {
 	switch typ {
 	case msg.TypeSuccess:
 		return "is-success"
-	case msg.TypeError:
+	case msg.TypeDanger:
 		return "is-danger"
 	case msg.TypeWarning:
 		return "is-warning"

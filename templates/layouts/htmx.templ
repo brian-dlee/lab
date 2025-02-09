@@ -1,10 +1,8 @@
 package layouts
 
-import (
-	"github.com/mikestefanello/pagoda/pkg/templates"
-)
+import "github.com/brian-dlee/lab/pkg/templates"
 
 // HTMX renders a minimal layout for HTMX requests
-templ HTMX(ctx templates.PageContext) {
+templ LayoutHTMX(ctx templates.PageContext) {
 	{ children... }
 }
