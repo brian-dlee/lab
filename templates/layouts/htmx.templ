@@ -1,0 +1,10 @@
+package layouts
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+)
+
+// HTMX renders a minimal layout for HTMX requests
+templ HTMX(ctx templates.PageContext) {
+	{ children... }
+}

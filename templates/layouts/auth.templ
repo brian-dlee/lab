@@ -1,0 +1,36 @@
+package layouts
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+)
+
+// Auth renders the authentication layout template
+templ Auth(ctx templates.PageContext) {
+	<!DOCTYPE html>
+	<html lang="en" style="height:100%;">
+		<head>
+			@MetaTags(ctx)
+			@CSS()
+			@JS()
+		</head>
+		<body class="has-background-light" style="min-height:100%;">
+			<section class="hero is-fullheight">
+				<div class="hero-body">
+					<div class="container">
+						<div class="columns is-centered">
+							<div class="column is-5-tablet is-4-desktop is-3-widescreen">
+								<div class="box">
+									if ctx.GetTitle() != "" {
+										<h1 class="title has-text-centered">{ ctx.GetTitle() }</h1>
+									}
+									{ children... }
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			@Footer(ctx)
+		</body>
+	</html>
+}

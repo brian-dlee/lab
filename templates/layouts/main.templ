@@ -1,0 +1,142 @@
+package layouts
+
+import (
+	"github.com/mikestefanello/pagoda/pkg/templates"
+)
+
+// MetaTags renders the meta tags in the head section
+templ MetaTags(ctx templates.PageContext) {
+	<title>{ ctx.GetAppName() }{ if ctx.GetTitle() != "" } | { ctx.GetTitle() }{ end }</title>
+	<link rel="icon" href={ templ.SafeURL(file("favicon.png")) }/>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+}
+
+// CSS renders the CSS includes
+templ CSS() {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+}
+
+// JS renders the JavaScript includes
+templ JS() {
+	<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+}
+
+// Footer renders the footer section with CSRF and HTMX scripts
+templ Footer(ctx templates.PageContext) {
+	if ctx.GetCSRF() != "" {
+		<script>
+			document.body.addEventListener('htmx:configRequest', function(evt)  {
+				if (evt.detail.verb !== "get") {
+					evt.detail.parameters['csrf'] = '{ ctx.GetCSRF() }';
+				}
+			})
+		</script>
+	}
+	<script>
+		document.body.addEventListener('htmx:beforeSwap', function(evt) {
+			if (evt.detail.xhr.status >= 400){
+				evt.detail.shouldSwap = true;
+				evt.detail.target = htmx.find("body");
+			}
+		});
+	</script>
+}
+
+// Search renders the search modal component
+templ Search(ctx templates.PageContext) {
+	<div class="search mr-2 mt-1" x-data="{modal:false}">
+		<input class="input" type="search" placeholder="Search..." @click="modal = true; $nextTick(() => $refs.input.focus());"/>
+		<div class="modal" :class="modal ? 'is-active' : ''" x-show="modal == true">
+			<div class="modal-background"></div>
+			<div class="modal-content" @click.outside="modal = false;">
+				<div class="box">
+					<h2 class="subtitle">Search</h2>
+					<p class="control">
+						<input
+							hx-get={ url("search") }
+							hx-trigger="keyup changed delay:500ms"
+							hx-target="#results"
+							name="query"
+							class="input"
+							type="search"
+							placeholder="Search..."
+							x-ref="input"
+						/>
+					</p>
+					<div class="block"></div>
+					<div id="results"></div>
+				</div>
+			</div>
+			<button class="modal-close is-large" aria-label="close"></button>
+		</div>
+	</div>
+}
+
+// Main renders the main layout template
+templ Main(ctx templates.PageContext) {
+	<!DOCTYPE html>
+	<html lang="en" style="height:100%;">
+		<head>
+			@MetaTags(ctx)
+			@CSS()
+			@JS()
+		</head>
+		<body class="has-background-light" style="min-height:100%;">
+			<nav class="navbar is-dark">
+				<div class="container">
+					<div class="navbar-brand" hx-boost="true">
+						<a href={ templ.SafeURL(url("home")) } class="navbar-item">{ ctx.GetAppName() }</a>
+					</div>
+					<div id="navbarMenu" class="navbar-menu">
+						<div class="navbar-end">
+							@Search(ctx)
+						</div>
+					</div>
+				</div>
+			</nav>
+
+			<div class="container mt-5">
+				<div class="columns">
+					<div class="column is-2">
+						<aside class="menu" hx-boost="true">
+							<p class="menu-label">General</p>
+							<ul class="menu-list">
+								<li>{ link(url("home"), "Dashboard", ctx.GetPath()) }</li>
+								<li>{ link(url("about"), "About", ctx.GetPath()) }</li>
+								<li>{ link(url("contact"), "Contact", ctx.GetPath()) }</li>
+								<li>{ link(url("cache"), "Cache", ctx.GetPath()) }</li>
+								<li>{ link(url("task"), "Task", ctx.GetPath()) }</li>
+							</ul>
+
+							<p class="menu-label">Account</p>
+							<ul class="menu-list">
+								if ctx.IsAuth() {
+									<li>{ link(url("logout"), "Logout", ctx.GetPath()) }</li>
+								} else {
+									<li>{ link(url("login"), "Login", ctx.GetPath()) }</li>
+									<li>{ link(url("register"), "Register", ctx.GetPath()) }</li>
+									<li>{ link(url("forgot_password"), "Forgot password", ctx.GetPath()) }</li>
+								}
+							</ul>
+						</aside>
+					</div>
+
+					<div class="column is-10">
+						<div class="box">
+							if ctx.GetTitle() != "" {
+								<h1 class="title">{ ctx.GetTitle() }</h1>
+							}
+
+							{ children... }
+						</div>
+					</div>
+				</div>
+			</div>
+
+			@Footer(ctx)
+		</body>
+	</html>
+}
