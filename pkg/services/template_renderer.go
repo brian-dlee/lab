@@ -7,12 +7,12 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
-	"github.com/brian-dlee/lab/config"
-	"github.com/brian-dlee/lab/pkg/context"
-	"github.com/brian-dlee/lab/pkg/log"
-	"github.com/brian-dlee/lab/pkg/msg"
-	"github.com/brian-dlee/lab/pkg/page"
-	"github.com/brian-dlee/lab/templates/pages"
+	"github.com/mikestefanello/pagoda/config"
+	"github.com/mikestefanello/pagoda/pkg/context"
+	"github.com/mikestefanello/pagoda/pkg/log"
+	"github.com/mikestefanello/pagoda/pkg/msg"
+	"github.com/mikestefanello/pagoda/pkg/page"
+	"github.com/mikestefanello/pagoda/templates/pages"
 )
 
 // cachedPageGroup stores the cache group for cached pages
